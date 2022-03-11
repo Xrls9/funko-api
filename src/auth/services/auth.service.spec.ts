@@ -15,19 +15,18 @@ describe('AuthService', () => {
   let userFactory: UserFactory;
   let tokenFactory: TokenFactory;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [AuthService],
     }).compile();
-
     authService = app.get<AuthService>(AuthService);
-    jest.clearAllMocks();
-  });
-
-  beforeAll(() => {
     userFactory = new UserFactory(prisma);
     tokenFactory = new TokenFactory(prisma);
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {

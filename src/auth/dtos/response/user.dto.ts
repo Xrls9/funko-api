@@ -1,5 +1,4 @@
 import { Exclude, Expose } from 'class-transformer';
-
 // get users response
 @Exclude()
 export class UserDto {

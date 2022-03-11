@@ -14,10 +14,10 @@ export class AuthController {
     return await this.authService.login(loginDto);
   }
 
-  @Public()
   @Get('logout')
   async logout(@Request() req) {
-    console.log(req);
-    console.log(req.route.authorization);
+    return await this.authService.logout(
+      req.headers.authorization.replace('Bearer ', ''),
+    );
   }
 }
