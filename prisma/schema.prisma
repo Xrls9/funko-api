@@ -11,6 +11,7 @@ model User {
   id                Int           @id @default(autoincrement())
   uuid              String        @unique @default(uuid())
   email             String        @unique
+  username          String        @unique
   password          String
   firstName         String        @map("first_name")
   lastName          String        @map("last_name")
@@ -31,8 +32,8 @@ model User {
 model Token {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique @default(uuid())
-  userId        String    @map("user_id")
-  user          User      @relation(fields: [userId], references: [uuid])
+  userId        Int       @map("user_id")
+  user          User      @relation(fields: [userId], references: [id])
   jti           String    @unique @default(uuid())
   aud           String?
   createdAt     DateTime  @default(now()) @map("created_at")
@@ -44,14 +45,14 @@ model Token {
 model Funko {
   id            Int       @id @default(autoincrement())
   uuid          String    @unique @default(uuid())
-  userId        String    @map("user_id")
-  user          User      @relation(fields: [userId], references: [uuid])
+  userId        Int       @map("user_id")
+  user          User      @relation(fields: [userId], references: [id])
   name          String
   category      String
   image         String?
   price         Float
   stock         Int
-  active        Boolean  @default(true)
+  active        Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -65,10 +66,10 @@ model Funko {
 model FunkoReaction {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique @default(uuid())
-  userId      String    @map("user_id")
-  user        User      @relation(fields: [userId], references: [uuid])
-  funkoId     String    @map("funko_id")
-  funko       Funko     @relation(fields: [funkoId], references: [uuid])
+  userId      Int       @map("user_id")
+  user        User      @relation(fields: [userId], references: [id])
+  funkoId     Int       @map("funko_id")
+  funko       Funko     @relation(fields: [funkoId], references: [id])
   reaction    String
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -79,8 +80,8 @@ model FunkoReaction {
 model Cart {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique @default(uuid())
-  userId      String    @map("user_id")
-  user        User      @relation(fields: [userId], references: [uuid])
+  userId      Int       @map("user_id")
+  user        User      @relation(fields: [userId], references: [id])
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -90,8 +91,8 @@ model Cart {
 model CartItem {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique @default(uuid())
-  funkoId     String    @map("funko_id")
-  funko       Funko     @relation(fields: [funkoId], references: [uuid])
+  funkoId     Int       @map("funko_id")
+  funko       Funko     @relation(fields: [funkoId], references: [id])
   quantity    Int       @default(1)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -102,8 +103,8 @@ model CartItem {
 model Order {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique @default(uuid())
-  userId      String    @map("user_id")
-  user        User      @relation(fields: [userId], references: [uuid])
+  userId      Int       @map("user_id")
+  user        User      @relation(fields: [userId], references: [id])
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -113,8 +114,8 @@ model Order {
 model OrderItem {
   id          Int       @id @default(autoincrement())
   uuid        String    @unique @default(uuid())
-  funkoId     String    @map("funko_id")
-  funko       Funko     @relation(fields: [funkoId], references: [uuid])
+  funkoId     Int       @map("funko_id")
+  funko       Funko     @relation(fields: [funkoId], references: [id])
   quantity    Int       @default(1)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
