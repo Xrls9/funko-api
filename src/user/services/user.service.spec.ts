@@ -4,9 +4,9 @@ import { plainToClass } from 'class-transformer';
 import faker from 'faker';
 import { NotFound, UnprocessableEntity } from 'http-errors';
 import { AuthController } from 'src/auth/controllers/auth.controller';
-import { TokenFactory } from 'src/auth/factories/token.factory';
 import { AuthService } from 'src/auth/services/auth.service';
 import { clearDatabase, prisma } from 'src/prisma';
+import { SendgridService } from 'src/services/sengrid.service';
 import { UserController } from '../controllers/user.controller';
 import { CreateUserDto } from '../dtos/request/create-user.dto';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
@@ -16,20 +16,19 @@ import { UserService } from './user.service';
 describe('UserService', () => {
   let userService: UserService;
   let authService: AuthService;
+  let sendgridService: SendgridService;
   let userFactory: UserFactory;
-  let tokenFactory: TokenFactory;
-  let users: User[];
 
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [UserController, AuthController],
-      providers: [UserService, AuthService],
+      providers: [UserService, AuthService, SendgridService],
     }).compile();
 
     userService = app.get<UserService>(UserService);
     authService = app.get<AuthService>(AuthService);
+    sendgridService = app.get<SendgridService>(SendgridService);
     userFactory = new UserFactory(prisma);
-    tokenFactory = new TokenFactory(prisma);
   });
 
   beforeEach(() => {
@@ -60,7 +59,7 @@ describe('UserService', () => {
 
     it('should create a new user', async () => {
       const spyCreateToken = jest.spyOn(authService, 'createToken');
-      // const spySendEmail = jest.spyOn(SendgridService, 'sendEmail');
+      const spySendEmail = jest.spyOn(sendgridService, 'sendEmail');
       const generateAccessToken = jest.spyOn(
         authService,
         'generateAccessToken',
@@ -76,7 +75,7 @@ describe('UserService', () => {
       const result = await userService.create(data);
 
       expect(spyCreateToken).toHaveBeenCalledTimes(1);
-      // expect(spySendEmail).toHaveBeenCalledTimes(1);
+      expect(spySendEmail).toHaveBeenCalledTimes(1);
       expect(generateAccessToken).toHaveBeenCalledTimes(1);
       expect(result).toBeTruthy();
     });
@@ -102,13 +101,13 @@ describe('UserService', () => {
     });
   });
 
-  describe('getUuidFromToken', () => {
+  describe('getIdFromToken', () => {
     it('should return a user uuid from token', async () => {
       const user = await userFactory.make({});
 
-      const token = await AuthService.createToken(user.uuid);
+      const token = await authService.createToken(user.id);
 
-      const result = await userService.getUuidFromToken(token.jti);
+      const result = await userService.getIdFromToken(token.jti);
 
       expect(result).toEqual(user.uuid);
     });
@@ -125,7 +124,7 @@ describe('UserService', () => {
       const data = plainToClass(UpdateUserDto, {});
 
       await expect(
-        userService.update(faker.datatype.uuid(), data),
+        userService.update(faker.datatype.number(100), data),
       ).rejects.toThrowError(new NotFound('User not found'));
     });
 
@@ -138,7 +137,7 @@ describe('UserService', () => {
 
       const data = plainToClass(UpdateUserDto, { email: existingEmail });
 
-      await expect(userService.update(user.uuid, data)).rejects.toThrowError(
+      await expect(userService.update(user.id, data)).rejects.toThrowError(
         new UnprocessableEntity('email already taken'),
       );
     });
@@ -148,7 +147,7 @@ describe('UserService', () => {
       const newEmail = faker.internet.email();
       const dto = plainToClass(UpdateUserDto, { email: newEmail });
 
-      const result = await userService.update(user.uuid, dto);
+      const result = await userService.update(user.id, dto);
 
       expect(result).toHaveProperty('email', newEmail);
     });

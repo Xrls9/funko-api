@@ -10,6 +10,10 @@ export class CreateUserDto extends BaseDto {
   readonly email: string;
 
   @Expose()
+  @IsEmail()
+  readonly username: string;
+
+  @Expose()
   @IsString()
   @Length(5, 20)
   readonly password: string;
