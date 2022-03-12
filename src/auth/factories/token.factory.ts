@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient, Token } from '@prisma/client';
-import { AbstractFactory } from 'src/utils/factories/abstract.factory';
+import { AbstractFactory } from '../../utils/factories/abstract.factory';
 
 type TokenInput = Prisma.TokenCreateInput;
 

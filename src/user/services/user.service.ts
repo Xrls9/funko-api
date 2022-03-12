@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { prisma } from 'src/prisma';
+import { prisma } from '../../prisma';
 import { UnprocessableEntity } from 'http-errors';
 import { CreateUserDto } from '../dtos/request/create-user.dto';
 import { hashSync } from 'bcrypt';
 import { NotFound } from 'http-errors';
-import { AuthService } from 'src/auth/services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { UserDto } from '../dtos/response/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Prisma } from '@prisma/client';
-import { PrismaErrorEnum } from 'src/utils/enums';
+import { PrismaErrorEnum } from '../../utils/enums';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
-import { SendgridService } from 'src/services/sengrid.service';
+import { SendgridService } from '../../services/sengrid.service';
 
 @Injectable()
 export class UserService {
@@ -19,29 +19,26 @@ export class UserService {
     private sendgridService: SendgridService,
   ) {}
 
-  async create({ password, ...input }: CreateUserDto) {
+  async create(input: CreateUserDto) {
     const userFound = await prisma.user.findUnique({
-      where: { username: input.username },
+      where: { email: input.email },
       select: { id: true },
       rejectOnNotFound: false,
     });
 
     if (userFound) {
-      throw new UnprocessableEntity('username already taken');
+      throw new UnprocessableEntity('email already taken');
     }
 
     const user = await prisma.user.create({
       data: {
         ...input,
-        password: hashSync(password, 10),
+        password: hashSync(input.password, 10),
       },
     });
 
     const token = await this.authService.createToken(user.id);
     const accessToken = this.authService.generateAccessToken(token.jti);
-    await SendgridService.sendEmail(user.email, accessToken).catch((err) => {
-      throw err;
-    });
 
     return true;
   }
@@ -62,7 +59,7 @@ export class UserService {
   }
 
   async update(
-    id: number,
+    uuid: string,
     { password, ...input }: UpdateUserDto,
   ): Promise<UserDto> {
     try {
@@ -71,26 +68,22 @@ export class UserService {
           ...input,
         },
         where: {
-          id,
+          uuid,
         },
       });
 
       return plainToInstance(UserDto, user);
     } catch (error) {
-      let throwable = error;
-
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case PrismaErrorEnum.NOT_FOUND:
-            throwable = new NotFound('User not found');
-            break;
+            throw new NotFound('User not found');
           case PrismaErrorEnum.DUPLICATED:
-            throwable = new UnprocessableEntity('email already taken');
-            break;
+            throw new UnprocessableEntity('email already taken');
         }
       }
 
-      throw throwable;
+      throw error;
     }
   }
 }

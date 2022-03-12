@@ -1,7 +1,8 @@
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import faker from 'faker';
-import { AbstractFactory } from 'src/utils/factories/abstract.factory';
+import { AbstractFactory } from '../../utils/factories/abstract.factory';
+import { internet, name, datatype } from 'faker';
 
 type UserInput = Partial<Prisma.UserCreateInput>;
 
@@ -14,11 +15,11 @@ export class UserFactory extends AbstractFactory<User> {
       data: {
         ...input,
         verified: input.verified ?? false,
-        firstName: input.firstName ?? faker.name.firstName(),
-        email: input.email ?? faker.internet.email(),
-        username: input.username ?? faker.internet.userName(),
-        lastName: input.lastName ?? faker.name.lastName(),
-        password: hashSync(input.password ?? faker.internet.password(), 10),
+        firstName: input.firstName ?? name.firstName(),
+        email: input.email ?? internet.email(),
+        username: input.username ?? internet.userName(),
+        lastName: input.lastName ?? name.lastName(),
+        password: hashSync(input.password ?? internet.password(), 10),
       },
     });
   }

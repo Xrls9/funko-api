@@ -1,8 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import { TokenDto } from 'src/auth/dtos/response/token.dto';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
-
 export class SendgridService {
   async sendEmail(email: string, emailToken: TokenDto): Promise<void> {
     sgMail.send({

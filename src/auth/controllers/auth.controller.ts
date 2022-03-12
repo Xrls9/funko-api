@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
-import { Public } from 'src/decorators/set-public.decorator';
+import { Public } from '../../decorators/set-public.decorator';
 import { LoginDto } from '../dtos/request/login.dto';
 import { TokenDto } from '../dtos/response/token.dto';
 import { AuthService } from '../services/auth.service';
@@ -14,6 +14,7 @@ export class AuthController {
     return await this.authService.login(loginDto);
   }
 
+  @Public()
   @Get('logout')
   async logout(@Request() req) {
     return await this.authService.logout(

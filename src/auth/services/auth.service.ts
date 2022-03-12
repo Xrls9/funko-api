@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { prisma } from 'src/prisma';
-import { LoginDto } from 'src/auth/dtos/request/login.dto';
-import { TokenDto } from 'src/auth/dtos/response/token.dto';
+import { prisma } from '../../prisma';
+import { LoginDto } from '../../auth/dtos/request/login.dto';
+import { TokenDto } from '../../auth/dtos/response/token.dto';
 import { Unauthorized } from 'http-errors';
 import { Prisma, Token } from '@prisma/client';
-import { PrismaErrorEnum } from 'src/utils/enums';
+import { PrismaErrorEnum } from '../../utils/enums';
 import { sign, verify } from 'jsonwebtoken';
 import { NotFound } from 'http-errors';
 
 @Injectable()
 export class AuthService {
   async login(loginDto: LoginDto): Promise<TokenDto> {
-    const { username, password } = loginDto;
+    const { email, password } = loginDto;
 
     const user = await prisma.user.findUnique({
-      where: { username: username },
+      where: { email: email },
       rejectOnNotFound: false,
     });
 

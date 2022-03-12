@@ -1,8 +1,8 @@
 import { plainToClass, plainToInstance } from 'class-transformer';
-import faker from 'faker';
-import { clearDatabase, prisma } from 'src/prisma';
-import { TokenFactory } from 'src/auth/factories/token.factory';
-import { UserFactory } from 'src/user/factories/user.factory';
+import { internet, datatype, lorem } from 'faker';
+import { clearDatabase, prisma } from '../../prisma';
+import { TokenFactory } from '../../auth/factories/token.factory';
+import { UserFactory } from '../../user/factories/user.factory';
 import { LoginDto } from '../dtos/request/login.dto';
 import { AuthService } from './auth.service';
 import { Unauthorized, NotFound } from 'http-errors';
@@ -39,14 +39,14 @@ describe('AuthService', () => {
     let userEmail: string;
 
     beforeAll(() => {
-      userPassword = faker.internet.password(6);
-      userEmail = faker.internet.email();
+      userPassword = internet.password(6);
+      userEmail = internet.email();
     });
 
     it('should throw an error if the user does not exist', async () => {
       const data = plainToInstance(LoginDto, {
-        email: faker.internet.email(),
-        password: faker.internet.password(6),
+        email: internet.email(),
+        password: internet.password(6),
       });
 
       await expect(authService.login(data)).rejects.toThrowError(
@@ -59,7 +59,7 @@ describe('AuthService', () => {
 
       const data = plainToClass(LoginDto, {
         email: userEmail,
-        password: faker.internet.password(6),
+        password: internet.password(6),
       });
 
       await expect(authService.login(data)).rejects.toThrowError(
@@ -82,7 +82,7 @@ describe('AuthService', () => {
   describe('createToken', () => {
     it('should throw an error if the user does not exist', async () => {
       await expect(
-        authService.createToken(faker.datatype.number()),
+        authService.createToken(datatype.number()),
       ).rejects.toThrowError(new NotFound('User not found'));
     });
 
@@ -105,7 +105,7 @@ describe('AuthService', () => {
         .spyOn(console, 'error')
         .mockImplementation(jest.fn());
 
-      await authService.logout(faker.lorem.word());
+      await authService.logout(lorem.word());
 
       expect(spyConsole).toBeCalledWith(new JsonWebTokenError('jwt malformed'));
     });
@@ -119,7 +119,7 @@ describe('AuthService', () => {
         .spyOn(jwt, 'verify')
         .mockImplementation(jest.fn(() => ({ sub: token.jti })));
 
-      const result = await authService.logout(faker.lorem.word());
+      const result = await authService.logout(lorem.word());
 
       expect(result).toBeTruthy();
     });
@@ -129,7 +129,7 @@ describe('AuthService', () => {
     it('should generate a token', async () => {
       jest.spyOn(jwt, 'sign').mockImplementation(jest.fn(() => '123.123.123'));
 
-      const result = authService.generateAccessToken(faker.lorem.word());
+      const result = authService.generateAccessToken(lorem.word());
 
       expect(result).toHaveProperty('accessToken', '123.123.123');
     });

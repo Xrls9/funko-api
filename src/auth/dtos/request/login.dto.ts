@@ -1,12 +1,12 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
-import { BaseDto } from 'src/dtos/base.dto';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { BaseDto } from '../../../dtos/base.dto';
 // login user body
 @Exclude()
 export class LoginDto extends BaseDto {
   @Expose()
-  @IsString()
-  readonly username: string;
+  @IsEmail()
+  readonly email: string;
 
   @Expose()
   @IsNotEmpty()
