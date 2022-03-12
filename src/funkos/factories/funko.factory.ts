@@ -1,6 +1,6 @@
 import { Funko, Prisma, PrismaClient } from '@prisma/client';
-import faker from 'faker';
-import { AbstractFactory } from 'src/utils/factories/abstract.factory';
+import { commerce, datatype } from 'faker';
+import { AbstractFactory } from '../../utils/factories/abstract.factory';
 
 type funkoInput = Partial<Prisma.FunkoCreateInput>;
 
@@ -12,10 +12,11 @@ export class FunkoFactory extends AbstractFactory<Funko> {
     return this.prismaClient.funko.create({
       data: {
         ...input,
-        price: input.price ?? faker.datatype.number(),
+        name: input.name ?? commerce.productName(),
+        price: input.price ?? datatype.number(),
         active: input.active ?? true,
         category: input.category ?? 'default',
-        stock: input.stock ?? faker.datatype.number({ max: 100 }),
+        stock: input.stock ?? datatype.number({ max: 100 }),
       },
     });
   }

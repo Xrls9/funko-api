@@ -19,4 +19,7 @@ export class FunkoDto {
 
   @Expose()
   readonly stock: number;
+
+  @Expose()
+  readonly active: boolean;
 }

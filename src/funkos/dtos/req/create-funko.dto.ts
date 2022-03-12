@@ -22,4 +22,8 @@ export class CreateFunkoDto extends BaseDto {
 
   @Expose()
   readonly stock: number;
+
+  @Expose()
+  @IsOptional()
+  readonly active: boolean;
 }
