@@ -3,9 +3,9 @@ import { User } from '@prisma/client';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { internet, datatype, commerce } from 'faker';
 import { NotFound, UnprocessableEntity } from 'http-errors';
-import { clearDatabase, prisma } from 'src/prisma';
-import { SendgridService } from 'src/services/sengrid.service';
-import { UserFactory } from 'src/user/factories/user.factory';
+import { clearDatabase, prisma } from '../../prisma';
+import { SendgridService } from '../../services/sengrid.service';
+import { UserFactory } from '../../user/factories/user.factory';
 import { FunkoController } from '../controllers/funko.controller';
 import { CreateFunkoDto } from '../dtos/req/create-funko.dto';
 import { UpdateFunkoDto } from '../dtos/req/update-funko.dto';
@@ -13,8 +13,7 @@ import { FunkoDto } from '../dtos/res/funko.dto';
 import { FunkoFactory } from '../factories/funko.factory';
 import { FunkoService } from './funko.service';
 
-describe('FunkoService', async () => {
-  let sendgridService: SendgridService;
+describe('FunkoService', () => {
   let funkoService: FunkoService;
   let userFactory: UserFactory;
   let funkoFactory: FunkoFactory;
@@ -27,6 +26,10 @@ describe('FunkoService', async () => {
       providers: [FunkoService],
     }).compile();
 
+    funkoService = app.get<FunkoService>(FunkoService);
+    userFactory = new UserFactory(prisma);
+    funkoFactory = new FunkoFactory(prisma);
+
     newUser = await userFactory.make({
       username: internet.userName(),
       password: internet.password(),
@@ -36,11 +39,8 @@ describe('FunkoService', async () => {
       name: 'Iron Man',
       category: 'default',
       stock: 10,
+      price: 50.0,
     });
-
-    sendgridService = app.get<SendgridService>(SendgridService);
-    funkoService = app.get<FunkoService>(FunkoService);
-    userFactory = new UserFactory(prisma);
   });
 
   beforeEach(() => {
@@ -48,25 +48,27 @@ describe('FunkoService', async () => {
   });
 
   afterAll(async () => {
-    await clearDatabase();
     await prisma.$disconnect();
   });
 
   describe('create', () => {
     it('should create a new funko', async () => {
       const result = await funkoService.create(newUser.uuid, dto);
-
       expect(result).toHaveProperty('active', true);
     });
   });
 
-  describe('update', async () => {
-    const funko = await funkoService.create(newUser.uuid, dto);
+  describe('update', () => {
+    let funko: FunkoDto;
+    beforeAll(async () => {
+      funko = await funkoService.create(newUser.uuid, dto);
+    });
 
     it('should throw an error if the funko does not exist', async () => {
       const data = plainToInstance(UpdateFunkoDto, {});
-      const result = await funkoService.update(datatype.uuid(), data);
-      expect(result).rejects.toThrowError(new NotFound('Funko not found'));
+      await expect(
+        funkoService.update(datatype.uuid(), data),
+      ).rejects.toThrowError(new NotFound('Funko not found'));
     });
 
     it('should update the funko values', async () => {
@@ -104,7 +106,7 @@ describe('FunkoService', async () => {
   describe('find', () => {
     it('should return a list of funkos', async () => {
       const funkos = await funkoFactory.makeMany(2, {
-        user: { connect: { id: (await userFactory.make()).id } },
+        user: { connect: { uuid: (await userFactory.make()).uuid } },
       });
 
       const result = await funkoService.find(0, funkos.length);

@@ -52,7 +52,7 @@ export class UserService {
     return plainToInstance(UserDto, user);
   }
 
-  async getIdFromToken(jti: string): Promise<number> {
+  async getIdFromToken(jti: string): Promise<string> {
     const token = await prisma.token.findUnique({ where: { jti } });
 
     return token.userId;
