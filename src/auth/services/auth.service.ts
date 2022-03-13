@@ -27,7 +27,7 @@ export class AuthService {
       throw new Unauthorized('Invalid credentials');
     }
 
-    const token = await this.createToken(user.id);
+    const token = await this.createToken(user.uuid);
     const tokenGenerated = this.generateAccessToken(token.jti);
     return tokenGenerated;
   }
@@ -46,7 +46,7 @@ export class AuthService {
     return false;
   }
 
-  async createToken(id: number): Promise<Token> {
+  async createToken(id: string): Promise<Token> {
     try {
       const token = await prisma.token.create({
         data: {

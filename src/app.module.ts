@@ -8,9 +8,13 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/services/user.service';
+import { SendgridService } from './services/sengrid.service';
+import { RolesGuard } from './guards/role.guard';
+import { FunkoService } from './funkos/services/funko.service';
+import { FunkoModule } from './funkos/funko.module';
 
 @Module({
-  imports: [AuthModule, UserModule],
+  imports: [AuthModule, UserModule, FunkoModule],
   controllers: [AppController],
   providers: [
     AppService,
@@ -20,6 +24,9 @@ import { UserService } from './user/services/user.service';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    SendgridService,
+    RolesGuard,
+    FunkoService,
   ],
 })
 export class AppModule {}

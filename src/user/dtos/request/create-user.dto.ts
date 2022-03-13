@@ -1,5 +1,11 @@
 import { Expose, Exclude } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 import { BaseDto } from '../../../dtos/base.dto';
 
 // create user body
@@ -7,33 +13,36 @@ import { BaseDto } from '../../../dtos/base.dto';
 export class CreateUserDto extends BaseDto {
   @Expose()
   @IsEmail()
+  @IsOptional()
   readonly email: string;
 
   @Expose()
   @IsString()
+  @IsOptional()
   readonly username: string;
 
   @Expose()
   @IsString()
   @Length(5, 20)
+  @IsOptional()
   readonly password: string;
 
   @Expose()
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   readonly firstName: string;
 
   @Expose()
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   readonly lastName: string;
 
   @Expose()
-  @IsNotEmpty()
   @IsString()
+  @IsOptional()
   readonly role: string;
 
   @Expose()
-  @IsNotEmpty()
+  @IsOptional()
   readonly verified: boolean;
 }

@@ -37,7 +37,7 @@ export class UserService {
       },
     });
 
-    const token = await this.authService.createToken(user.id);
+    const token = await this.authService.createToken(user.uuid);
     const accessToken = this.authService.generateAccessToken(token.jti);
 
     return true;
@@ -58,10 +58,7 @@ export class UserService {
     return token.userId;
   }
 
-  async update(
-    uuid: string,
-    { password, ...input }: UpdateUserDto,
-  ): Promise<UserDto> {
+  async update(uuid: string, { ...input }: UpdateUserDto): Promise<UserDto> {
     try {
       const user = await prisma.user.update({
         data: {
