@@ -6,10 +6,6 @@ import { BaseDto } from '../../../../dtos/base.dto';
 @Exclude()
 export class CreateCartDto extends BaseDto {
   @Expose()
-  @IsString()
-  readonly userId: string;
-
-  @Expose()
   @IsNumber()
   @IsOptional()
   readonly totalPrice: number;

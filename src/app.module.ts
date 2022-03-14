@@ -12,14 +12,17 @@ import { SendgridService } from './services/sengrid.service';
 import { RolesGuard } from './guards/role.guard';
 import { FunkoService } from './funkos/services/funko.service';
 import { FunkoModule } from './funkos/funko.module';
+import { CartService } from './carts/services/cart.service';
+import { CartModule } from './carts/cart.module';
 
 @Module({
-  imports: [AuthModule, UserModule, FunkoModule],
+  imports: [AuthModule, UserModule, FunkoModule, CartModule],
   controllers: [AppController],
   providers: [
     AppService,
     AuthService,
     UserService,
+    CartService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

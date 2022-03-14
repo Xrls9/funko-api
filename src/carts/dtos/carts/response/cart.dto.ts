@@ -10,5 +10,5 @@ export class CartDto {
   readonly userID: string;
 
   @Expose()
-  readonly total: number;
+  readonly totalPrice: number;
 }
