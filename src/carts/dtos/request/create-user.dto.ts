@@ -1,13 +1,11 @@
 import { Expose, Exclude } from 'class-transformer';
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
-import { UserRole } from '@prisma/client';
 import { BaseDto } from '../../../dtos/base.dto';
 
 // create user body
@@ -41,8 +39,8 @@ export class CreateUserDto extends BaseDto {
 
   @Expose()
   @IsString()
-  @IsEnum(UserRole)
-  readonly role: UserRole;
+  @IsOptional()
+  readonly role: string;
 
   @Expose()
   @IsOptional()

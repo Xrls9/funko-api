@@ -3,3 +3,8 @@ export enum PrismaErrorEnum {
   DUPLICATED = 'P2002', // Unique constraint fails
   FOREIGN_KEY_CONSTRAINT = 'P2003', // Foreign key constraint fails
 }
+
+export enum UserRole {
+  client = 'client',
+  manager = 'manager',
+}
