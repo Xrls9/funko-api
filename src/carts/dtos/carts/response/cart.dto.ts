@@ -2,7 +2,7 @@ import { Exclude, Expose } from 'class-transformer';
 
 // get users response
 @Exclude()
-export class Cart {
+export class CartDto {
   @Expose()
   readonly uuid: string;
 

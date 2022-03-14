@@ -103,7 +103,7 @@ describe('UserService', () => {
     it('should return a user id from token', async () => {
       const user = await userFactory.make({});
 
-      const token = await authService.createToken(user.id);
+      const token = await authService.createToken(user.uuid);
 
       const result = await userService.getIdFromToken(token.jti);
 

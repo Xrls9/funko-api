@@ -2,7 +2,7 @@ import { Exclude, Expose } from 'class-transformer';
 
 // get users response
 @Exclude()
-export class CartItem {
+export class OrderItem {
   @Expose()
   readonly uuid: string;
 
@@ -10,7 +10,7 @@ export class CartItem {
   readonly userID: string;
 
   @Expose()
-  readonly cartID: string;
+  readonly orderID: string;
 
   @Expose()
   readonly funkoID: string;

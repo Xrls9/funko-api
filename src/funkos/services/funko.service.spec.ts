@@ -48,6 +48,7 @@ describe('FunkoService', () => {
   });
 
   afterAll(async () => {
+    await clearDatabase();
     await prisma.$disconnect();
   });
 
