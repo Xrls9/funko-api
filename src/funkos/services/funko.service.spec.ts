@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/client';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { internet, datatype, commerce } from 'faker';
-import { NotFound, UnprocessableEntity } from 'http-errors';
+import { NotFound } from 'http-errors';
 import { clearDatabase, prisma } from '../../prisma';
-import { SendgridService } from '../../services/sengrid.service';
 import { UserFactory } from '../../user/factories/user.factory';
 import { FunkoController } from '../controllers/funko.controller';
 import { CreateFunkoDto } from '../dtos/req/create-funko.dto';
