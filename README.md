@@ -24,26 +24,43 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Funko Store Rest-Api with NestJs and Prisma(PostgreSql)
+
+## About The Project
+
+funko-api consists in a REST service which allows to a user to easily buy and manage products(funkos), for more, you can check the project's documentation executing the app and going to {{project_base_uri}}/docs, or you can take a look on postman docs as it's especified bellow
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
+_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+1. Get a free API Key at [https://signup.sendgird.com](https://signup.sendgrid.com) (not supported yet)
+2. Clone the repo
+   ```sh
+   
+   git clone https://github.com/Xrls9/funko-api.git
+   ```
+3. Install NPM packages
+   ```sh
+   
+   npm install
+   ```
+4. Enter your API in `.env`
+   ```js
+   
+   const SENDGRID_API_KEY = 'ENTER YOUR API';
+   ```
+5. Create a Postgre DB and setup connection
+   ```sh
+   
+   DATABASE_URL = postgresql://username:password@localhost:port/DB_NAME?schema-public
+   PORT= default(5432)
+   ```
+6. Install PrismaCLI and execute Prisma Migration tool.
+   ```
+   npm install @prisma/cli --save-dev
+   npx prisma migrate dev
+   ```
 
 ## Test
 
@@ -57,17 +74,9 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+ 
+<!-- USAGE EXAMPLES -->
+## Usage
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+_For examples of the endpoints, please check the [Documentation](https://documenter.getpostman.com/view/19560659/UVsLQkf7)_
+<p align="right">(<a href="#top">back to top</a>)</p>
