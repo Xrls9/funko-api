@@ -6,15 +6,7 @@ import { IsNumber, IsString } from 'class-validator';
 export class CreateCartItemDto {
   @Expose()
   @IsString()
-  readonly uuid: string;
-
-  @Expose()
-  @IsString()
-  readonly cartID: string;
-
-  @Expose()
-  @IsString()
-  readonly funkoID: string;
+  readonly funkoId: string;
 
   @Expose()
   @IsNumber()

@@ -17,6 +17,6 @@ import { FunkoService } from './services/funko.service';
     FunkoService,
     RolesGuard,
   ],
-  exports: [],
+  exports: [FunkoModule, FunkoService],
 })
 export class FunkoModule {}

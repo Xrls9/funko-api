@@ -5,9 +5,10 @@ import { AuthService } from '../auth/services/auth.service';
 import { JwtStrategy } from '../services/jwt.strategy';
 import { CartService } from './services/cart.service';
 import { CartController } from './controllers/cart.controller';
+import { FunkoModule } from '../funkos/funko.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, FunkoModule],
   controllers: [CartController],
   providers: [JwtStrategy, AuthService, CartService, RolesGuard],
   exports: [],

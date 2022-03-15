@@ -10,11 +10,19 @@ import { UpdateFunkoDto } from '../dtos/req/update-funko.dto';
 
 @Injectable()
 export class FunkoService {
-  async find(page: number, pageItems: number): Promise<FunkoDto[]> {
+  async find(
+    page: number,
+    pageItems: number,
+    category: string,
+  ): Promise<FunkoDto[]> {
     const funkos = await prisma.funko.findMany({
-      skip: page * pageItems,
+      skip: (page - 1) * pageItems,
       take: pageItems,
       orderBy: { createdAt: 'desc' },
+      where: {
+        category,
+        active: true,
+      },
     });
 
     return plainToInstance(FunkoDto, funkos);
@@ -81,11 +89,11 @@ export class FunkoService {
     return plainToInstance(FunkoDto, funko);
   }
 
-  // async findPostReaction(
+  // async findfunkoReaction(
   //   postId: string,
   //   userId: string,
-  // ): Promise<PostReaction[]> {
-  //   const postReactionFound = await prisma.postReaction.findMany({
+  // ): Promise<FunkoReaction[]> {
+  //   const postReactionFound = await prisma.funkoReaction.findMany({
   //     where: {
   //       postId,
   //       userId,
@@ -97,23 +105,23 @@ export class FunkoService {
   // async createReaction(
   //   userId: string,
   //   { ...input }: CreatePostReactionDto,
-  // ): Promise<PostReactionCreatedDto> {
-  //   const postReaction = await prisma.postReaction.create({
+  // ): Promise<FunkoReactionCreatedDto> {
+  //   const funkoReaction = await prisma.funkoReaction.create({
   //     data: {
   //       ...input,
   //       userId: userId,
   //     },
   //   });
 
-  //   return postReaction;
+  //   return funkoReaction;
   // }
 
   // async updateReaction(
   //   uuid: string,
   //   status: string,
-  // ): Promise<PostReactionCreatedDto> {
+  // ): Promise<FunkoReactionCreatedDto> {
   //   try {
-  //     const postReactionUpdated = await prisma.postReaction.update({
+  //     const funkoReactionUpdated = await prisma.funkoReaction.update({
   //       data: {
   //         status,
   //       },
@@ -122,13 +130,13 @@ export class FunkoService {
   //       },
   //     });
 
-  //     return postReactionUpdated;
+  //     return funkoReactionUpdated;
   //   } catch (error) {
   //     let throwable = error;
   //     if (error instanceof Prisma.PrismaClientKnownRequestError) {
   //       switch (error.code) {
   //         case :
-  //           throwable = new NotFound('Post Reaction not found');
+  //           throwable = new NotFound('Funko Reaction not found');
   //       }
   //     }
   //     throw throwable;
