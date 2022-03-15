@@ -107,7 +107,7 @@ describe('UserService', () => {
 
       const result = await userService.getIdFromToken(token.jti);
 
-      expect(result).toEqual(user.id);
+      expect(result).toEqual(user.uuid);
     });
   });
 

@@ -82,7 +82,7 @@ model Cart {
   uuid        String    @unique @default(uuid())
   userId      String?   @map("user_id")
   user        User?     @relation(fields: [userId], references: [uuid])
-  totalPrice  Decimal   @default(0)
+  totalPrice  Float     @db.Real @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -99,8 +99,8 @@ model CartItem {
   funkoId     String?   @map("funko_id")
   funko       Funko?    @relation(fields: [funkoId], references: [uuid])
   quantity    Int       @default(1)
-  unitPrice   Decimal?
-  totalPrice  Decimal   @default(0)
+  unitPrice   Float?    @db.Real
+  totalPrice  Float     @db.Real @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -112,7 +112,7 @@ model Order {
   uuid        String    @unique @default(uuid())
   userId      String?   @map("user_id")
   user        User?     @relation(fields: [userId], references: [uuid])
-  totalPrice  Decimal   @default(0)
+  totalPrice  Float     @db.Real @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -129,8 +129,8 @@ model OrderItem {
   funkoId     String?   @map("funko_id")
   funko       Funko?    @relation(fields: [funkoId], references: [uuid])
   quantity    Int       @default(1)
-  unitPrice   Decimal?
-  totalPrice  Decimal   @default(0)
+  unitPrice   Float?    @db.Real
+  totalPrice  Float     @db.Real @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 

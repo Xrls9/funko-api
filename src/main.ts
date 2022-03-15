@@ -2,13 +2,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-// import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // const prismaService: PrismaService = app.get(PrismaService);
-  // prismaService.enableShutdownHooks(app);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,8 +21,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   const options = new DocumentBuilder()
-    .setTitle('snackapp')
-    .setDescription('Your favorite snack store')
+    .setTitle('funko-app')
+    .setDescription('Your favorite funko store')
     .setVersion('1.0.0')
     .build();
 

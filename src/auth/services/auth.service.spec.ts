@@ -82,15 +82,15 @@ describe('AuthService', () => {
   describe('createToken', () => {
     it('should throw an error if the user does not exist', async () => {
       await expect(
-        authService.createToken(datatype.number()),
+        authService.createToken(datatype.uuid()),
       ).rejects.toThrowError(new NotFound('User not found'));
     });
 
     it('should create the token', async () => {
       const user = await userFactory.make();
-      const result = await authService.createToken(user.id);
+      const result = await authService.createToken(user.uuid);
 
-      expect(result).toHaveProperty('userId', user.id);
+      expect(result).toHaveProperty('userId', user.uuid);
     });
   });
 
