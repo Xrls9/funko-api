@@ -8,9 +8,12 @@ import { Prisma, Token } from '@prisma/client';
 import { PrismaErrorEnum } from '../../utils/enums';
 import { sign, verify } from 'jsonwebtoken';
 import { NotFound } from 'http-errors';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+  constructor(private configService: ConfigService) {}
+
   async login(loginDto: LoginDto): Promise<TokenDto> {
     const { email, password } = loginDto;
 
@@ -36,7 +39,10 @@ export class AuthService {
     if (!accessToken) return false;
 
     try {
-      const { sub } = verify(accessToken, process.env.JWT_SECRET_KEY as string);
+      const { sub } = verify(
+        accessToken,
+        this.configService.get('JWT_SECRET_KEY') as string,
+      );
 
       await prisma.token.delete({ where: { jti: sub as string } });
       return true;
@@ -72,7 +78,7 @@ export class AuthService {
     const now = new Date().getTime();
     const exp = Math.floor(
       new Date(now).setSeconds(
-        parseInt(process.env.JWT_EXPIRATION_TIME as string, 10),
+        parseInt(this.configService.get('JWT_EXPIRATION_TIME') as string, 10),
       ) / 1000,
     );
     const iat = Math.floor(now / 1000);
@@ -83,7 +89,7 @@ export class AuthService {
         iat,
         exp,
       },
-      process.env.JWT_SECRET_KEY as string,
+      this.configService.get('JWT_SECRET_KEY') as string,
     );
 
     return {

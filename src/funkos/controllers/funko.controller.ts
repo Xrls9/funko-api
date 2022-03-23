@@ -36,7 +36,6 @@ import { UserRole } from '../../utils/enums';
 export class FunkoController {
   constructor(private readonly funkoService: FunkoService) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.manager)
   @Post()
   @ApiOperation({ summary: 'Creates a new Funko' })
@@ -45,6 +44,7 @@ export class FunkoController {
     status: 401,
     description: 'Unauthorized, you must be a manager role User',
   })
+  @UseGuards(RolesGuard)
   @ApiBearerAuth()
   async create(
     @getUser() user: User,
@@ -66,6 +66,7 @@ export class FunkoController {
     return await this.funkoService.find(page, pageItems, category);
   }
 
+  @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.manager)
   @ApiOperation({ summary: 'Updates an existing Funko' })
@@ -79,7 +80,6 @@ export class FunkoController {
     description: 'Funko not found',
   })
   @ApiBearerAuth()
-  @Patch(':id')
   async update(
     @Param('id') funkoUuid: string,
     @Body() updateUserDto: UpdateFunkoDto,
@@ -87,9 +87,9 @@ export class FunkoController {
     return await this.funkoService.update(funkoUuid, updateUserDto);
   }
 
+  @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.manager)
-  @Delete(':id')
   @ApiOperation({ summary: 'Deletes an existing Funko' })
   @ApiResponse({ status: 200, description: 'Funko deleted Info' })
   @ApiResponse({

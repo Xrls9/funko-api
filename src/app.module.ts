@@ -12,9 +12,19 @@ import { FunkoService } from './funkos/services/funko.service';
 import { FunkoModule } from './funkos/funko.module';
 import { CartService } from './carts/services/cart.service';
 import { CartModule } from './carts/cart.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, UserModule, FunkoModule, CartModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    FunkoModule,
+    CartModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+  ],
   controllers: [],
   providers: [
     AuthService,
