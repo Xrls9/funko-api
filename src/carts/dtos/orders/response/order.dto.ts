@@ -7,8 +7,11 @@ export class Order {
   readonly uuid: string;
 
   @Expose()
-  readonly userID: string;
+  readonly userId: string;
 
   @Expose()
-  readonly total: number;
+  readonly totalPrice: number;
+
+  @Expose()
+  readonly createdAt: string;
 }

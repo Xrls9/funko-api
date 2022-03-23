@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 // import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth/services/auth.service';
 import { AuthModule } from './auth/auth.module';
@@ -17,9 +15,8 @@ import { CartModule } from './carts/cart.module';
 
 @Module({
   imports: [AuthModule, UserModule, FunkoModule, CartModule],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     AuthService,
     UserService,
     CartService,

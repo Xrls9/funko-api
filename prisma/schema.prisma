@@ -1,6 +1,6 @@
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,131 +8,133 @@ generator client {
 }
 
 model User {
-  id                Int           @id @default(autoincrement())
-  uuid              String        @unique @default(uuid())
-  email             String        @unique
-  username          String        @unique
-  password          String
-  firstName         String        @map("first_name")
-  lastName          String        @map("last_name")
-  role              UserRole      @default(client) 
-  verified          Boolean
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      UserRole @default(client)
+  verified  Boolean
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  tokens            Token[]
-  funkos            Funko[]
-  funkoReactions    FunkoReaction[]
-  carts             Cart[]
-  orders            Order[]
+  tokens         Token[]
+  funkos         Funko[]
+  funkoReactions FunkoReaction[]
+  carts          Cart[]
+  orders         Order[]
 
   @@map("users")
 }
 
 model Token {
-  id            Int       @id @default(autoincrement())
-  uuid          String    @unique @default(uuid())
-  userId        String?       @map("user_id")
-  user          User?      @relation(fields: [userId], references: [uuid])
-  jti           String    @unique @default(uuid())
-  aud           String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [uuid])
+  jti       String   @unique @default(uuid())
+  aud       String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("tokens")
 }
 
 model Funko {
-  id            Int       @id @default(autoincrement())
-  uuid          String    @unique @default(uuid())
-  userId        String?       @map("user_id")
-  user          User?      @relation(fields: [userId], references: [uuid])
-  name          String
-  category      String
-  image         String?
-  price         Float
-  stock         Int
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [uuid])
+  name      String
+  category  String
+  image     String?
+  price     Float
+  stock     Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  reactions     FunkoReaction[]
-  cart_items    CartItem[]
-  order_items   OrderItem[]
+  reactions   FunkoReaction[]
+  cart_items  CartItem[]
+  order_items OrderItem[]
 
   @@map("funkos")
 }
 
 model FunkoReaction {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  userId      String?   @map("user_id")
-  user        User?     @relation(fields: [userId], references: [uuid])
-  funkoId     String    @map("funko_id")
-  funko       Funko     @relation(fields: [funkoId], references: [uuid])
-  reaction    String
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [uuid])
+  funkoId   String   @map("funko_id")
+  funko     Funko    @relation(fields: [funkoId], references: [uuid])
+  reaction  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("funko_reactions")
 }
 
 model Cart {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  userId      String?   @map("user_id")
-  user        User?     @relation(fields: [userId], references: [uuid])
-  totalPrice  Float     @db.Real @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [uuid])
+  totalPrice Float    @default(0) @db.Real
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  cart_items    CartItem[]
+  cart_items CartItem[]
 
   @@map("carts")
 }
 
 model CartItem {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  cartId      String?   @map("cart_id")
-  cart        Cart?     @relation(fields: [cartId], references: [uuid])
-  funkoId     String?   @map("funko_id")
-  funko       Funko?    @relation(fields: [funkoId], references: [uuid])
-  quantity    Int       @default(1)
-  unitPrice   Float?    @db.Real
-  totalPrice  Float     @db.Real @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid())
+  cartId      String?  @map("cart_id")
+  cart        Cart?    @relation(fields: [cartId], references: [uuid])
+  funkoId     String?  @map("funko_id")
+  funko       Funko?   @relation(fields: [funkoId], references: [uuid])
+  description String   @default("")
+  quantity    Int      @default(1)
+  unitPrice   Float?   @db.Real
+  totalPrice  Float    @default(0) @db.Real
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("cart_items")
 }
 
 model Order {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  userId      String?   @map("user_id")
-  user        User?     @relation(fields: [userId], references: [uuid])
-  totalPrice  Float     @db.Real @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [uuid])
+  totalPrice Float    @default(0) @db.Real
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  order_items   OrderItem[]
+  order_items OrderItem[]
 
   @@map("orders")
 }
 
 model OrderItem {
-  id          Int       @id @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  orderId     String?   @map("order_id")
-  order       Order?    @relation(fields: [orderId], references: [uuid])
-  funkoId     String?   @map("funko_id")
-  funko       Funko?    @relation(fields: [funkoId], references: [uuid])
-  quantity    Int       @default(1)
-  unitPrice   Float?    @db.Real
-  totalPrice  Float     @db.Real @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid())
+  orderId     String?  @map("order_id")
+  order       Order?   @relation(fields: [orderId], references: [uuid])
+  funkoId     String?  @map("funko_id")
+  funko       Funko?   @relation(fields: [funkoId], references: [uuid])
+  description String   @default("")
+  quantity    Int      @default(1)
+  unitPrice   Float?   @db.Real
+  totalPrice  Float    @default(0) @db.Real
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("order_items")
 }

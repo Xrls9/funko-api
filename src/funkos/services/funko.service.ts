@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaErrorEnum } from '../../utils/enums';
 import { FunkoDto } from '../dtos/res/funko.dto';
 import { UpdateFunkoDto } from '../dtos/req/update-funko.dto';
+import { PaginationDto } from '../dtos/res/pagination.dto';
 
 @Injectable()
 export class FunkoService {
@@ -14,18 +15,23 @@ export class FunkoService {
     page: number,
     pageItems: number,
     category: string,
-  ): Promise<FunkoDto[]> {
-    const funkos = await prisma.funko.findMany({
-      skip: (page - 1) * pageItems,
-      take: pageItems,
-      orderBy: { createdAt: 'desc' },
-      where: {
-        category,
-        active: true,
-      },
-    });
+  ): Promise<PaginationDto> {
+    const skip = (page - 1) * pageItems;
+    const take = pageItems;
+    const funkos = plainToInstance(
+      FunkoDto,
+      await prisma.funko.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        where: {
+          category: { contains: category },
+          active: true,
+        },
+      }),
+    );
 
-    return plainToInstance(FunkoDto, funkos);
+    return { results: funkos, paginationInfo: { skip, take: funkos.length } };
   }
 
   async create(uuid: string, { ...input }: CreateFunkoDto): Promise<FunkoDto> {

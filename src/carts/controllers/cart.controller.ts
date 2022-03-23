@@ -3,19 +3,29 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from 'src/decorators/set-public.decorator';
 import { RolesGuard } from '../..//guards/role.guard';
+import { getUser } from '../../user/decorators/get-user.decorator';
+
 import { CreateCartItemDto } from '../dtos/carts/request/create-cart-item.dto';
-import { UpdateCartItemDto } from '../dtos/carts/request/update-cart-item.dto';
+
 import { UpdateCartDto } from '../dtos/carts/request/update-cart.dto';
 import { CartItemDto } from '../dtos/carts/response/cart-item.dto';
 import { CartDto } from '../dtos/carts/response/cart.dto';
+import { OrderResponse } from '../dtos/orders/response/order-response.dto';
+import { Order } from '../dtos/orders/response/order.dto';
 import { CartService } from '../services/cart.service';
 
 @ApiTags('ShoppingCart')
@@ -34,8 +44,9 @@ export class CartController {
     status: 404,
     description: 'User not Found',
   })
-  async createCart(@Req() req): Promise<CartDto> {
-    return await this.cartService.createCart(req.user.uuid);
+  @ApiBearerAuth()
+  async createCart(@getUser() user): Promise<CartDto> {
+    return await this.cartService.createCart(user.uuid);
   }
 
   @Patch(':id')
@@ -49,6 +60,7 @@ export class CartController {
     status: 404,
     description: 'Cart not found',
   })
+  @ApiBearerAuth()
   async updateCart(
     @Param('id') cartId: string,
     @Body() updateCartDto: UpdateCartDto,
@@ -63,6 +75,7 @@ export class CartController {
     status: 404,
     description: 'Cart not found',
   })
+  @ApiBearerAuth()
   async cartInfo(@Param('id') cartId: string): Promise<CartDto> {
     return await this.cartService.findCartByUuid(cartId);
   }
@@ -74,6 +87,7 @@ export class CartController {
     status: 404,
     description: 'Cart not found',
   })
+  @ApiBearerAuth()
   async showCartDetails(@Param('id') cartId: string): Promise<CartItemDto[]> {
     return await this.cartService.getCartItems(cartId);
   }
@@ -85,6 +99,7 @@ export class CartController {
     status: 404,
     description: 'Cart not found',
   })
+  @ApiBearerAuth()
   async addItemToCart(
     @Param('id') cartId: string,
     @Body() createCartItemDto: CreateCartItemDto,
@@ -99,14 +114,18 @@ export class CartController {
     status: 404,
     description: 'CartItem not found',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'The funko funko.name is not available',
+  })
+  @ApiBearerAuth()
   async updateCartItem(
     @Param('id') cartItemUuid: string,
-    @Body() updateCartItemDto: UpdateCartItemDto,
+    @Body('quantity', ParseIntPipe) quantity: number,
   ): Promise<CartItemDto> {
-    return await this.cartService.updateCartItem(
-      cartItemUuid,
-      updateCartItemDto,
-    );
+    return await this.cartService.updateCartItem(cartItemUuid, {
+      quantity: quantity,
+    });
   }
 
   @Post(':id/deleteItem')
@@ -116,9 +135,68 @@ export class CartController {
     status: 404,
     description: 'CartItem not found',
   })
+  @ApiBearerAuth()
   async deleteCartItem(
     @Param('id') cartItemUuid: string,
   ): Promise<CartItemDto> {
     return await this.cartService.deleteCartItem(cartItemUuid);
+  }
+
+  @Post(':id/clearCart')
+  @ApiOperation({ summary: 'Clear Cart' })
+  @ApiResponse({ status: 200, description: 'OrderResponse' })
+  @ApiResponse({
+    status: 404,
+    description: 'Cart not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'The funko funko.name is not available',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Cart is empty',
+  })
+  @ApiBearerAuth()
+  async clearCart(@Param('id') cartUuid: string): Promise<CartDto> {
+    return await this.cartService.clearCart(cartUuid);
+  }
+
+  @Post(':id/checkout')
+  @ApiOperation({ summary: 'Proceed to Checkout' })
+  @ApiResponse({ status: 200, description: 'OrderResponse' })
+  @ApiResponse({
+    status: 404,
+    description: 'CartItem not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'The funko funko.name is not available',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Cart is empty',
+  })
+  @ApiBearerAuth()
+  async proceedToCheckout(
+    @Param('id') cartUuid: string,
+  ): Promise<OrderResponse> {
+    return await this.cartService.checkout(cartUuid);
+  }
+
+  @Get('show-orders/:id')
+  @ApiOperation({ summary: 'shows orders from a Client' })
+  @ApiResponse({ status: 200, description: 'Orders' })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'User does not have any order yet',
+  })
+  @ApiBearerAuth()
+  async showUserOrders(@Param('id') userUuid: string): Promise<Order[]> {
+    return await this.cartService.showUserOrders(userUuid);
   }
 }

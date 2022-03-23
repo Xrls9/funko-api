@@ -13,6 +13,8 @@ import { FunkoFactory } from '../factories/funko.factory';
 import { FunkoService } from './funko.service';
 
 describe('FunkoService', () => {
+  //TODO remove imports and unused vars with eslint
+  let randomvar: FunkoService;
   let funkoService: FunkoService;
   let userFactory: UserFactory;
   let funkoFactory: FunkoFactory;
@@ -109,7 +111,7 @@ describe('FunkoService', () => {
         user: { connect: { uuid: (await userFactory.make()).uuid } },
       });
 
-      const result = await funkoService.find(0, funkos.length);
+      const result = await funkoService.find(0, funkos.length, 'default');
 
       expect(result.length).toBe(funkos.length);
     });

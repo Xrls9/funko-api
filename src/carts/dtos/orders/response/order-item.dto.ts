@@ -1,26 +1,10 @@
+import { OmitType } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
+import { CartItemDto } from '../../carts/response/cart-item.dto';
 
 // get users response
 @Exclude()
-export class OrderItem {
+export class OrderItem extends OmitType(CartItemDto, ['cartId'] as const) {
   @Expose()
-  readonly uuid: string;
-
-  @Expose()
-  readonly userID: string;
-
-  @Expose()
-  readonly orderID: string;
-
-  @Expose()
-  readonly funkoID: string;
-
-  @Expose()
-  readonly quantity: number;
-
-  @Expose()
-  readonly unitPrice: number;
-
-  @Expose()
-  readonly totalPrice: number;
+  readonly orderId: string;
 }

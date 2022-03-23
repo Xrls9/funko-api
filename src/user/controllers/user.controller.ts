@@ -1,5 +1,10 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from '../../decorators/set-public.decorator';
 import { CreateUserDto } from '../dtos/request/create-user.dto';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
@@ -15,11 +20,12 @@ export class UserController {
   @Post()
   @ApiOperation({ summary: 'Creates a new User' })
   @ApiResponse({ status: 200, description: 'User created Info' })
-  async create(@Body() userDto: CreateUserDto): Promise<boolean> {
+  async create(@Body() userDto: CreateUserDto): Promise<UserDto> {
     return await this.userService.create(userDto);
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Find a User with the given UUID' })
   @ApiResponse({ status: 200, description: 'User Info' })
   async findOne(@Param('id') userUuid: string): Promise<UserDto> {
@@ -29,6 +35,7 @@ export class UserController {
   @Patch(':id')
   @ApiOperation({ summary: 'Updates an existing User' })
   @ApiResponse({ status: 200, description: 'User Info' })
+  @ApiBearerAuth()
   async update(
     @Param('id') userUuid: string,
     @Body() updateUserDto: UpdateUserDto,

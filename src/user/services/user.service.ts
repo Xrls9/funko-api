@@ -19,7 +19,7 @@ export class UserService {
     private sendgridService: SendgridService,
   ) {}
 
-  async create(input: CreateUserDto) {
+  async create(input: CreateUserDto): Promise<UserDto> {
     const userFound = await prisma.user.findUnique({
       where: { email: input.email },
       select: { id: true },
@@ -40,7 +40,7 @@ export class UserService {
     const token = await this.authService.createToken(user.uuid);
     const accessToken = this.authService.generateAccessToken(token.jti);
 
-    return true;
+    return plainToInstance(UserDto, user);
   }
 
   async findOne(uuid: string): Promise<UserDto> {

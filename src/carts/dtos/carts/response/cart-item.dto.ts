@@ -7,13 +7,13 @@ export class CartItemDto {
   readonly uuid: string;
 
   @Expose()
-  readonly userID: string;
+  readonly cartId: string;
 
   @Expose()
-  readonly cartID: string;
+  readonly funkoId: string;
 
   @Expose()
-  readonly funkoID: string;
+  readonly description: string;
 
   @Expose()
   readonly quantity: number;
