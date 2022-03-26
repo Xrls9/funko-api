@@ -1,12 +1,5 @@
 import { Expose, Exclude } from 'class-transformer';
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
 import { UserRole } from '@prisma/client';
 import { BaseDto } from '../../../dtos/base.dto';
 

@@ -6,8 +6,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Req,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -15,8 +13,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/set-public.decorator';
-import { RolesGuard } from '../..//guards/role.guard';
 import { getUser } from '../../user/decorators/get-user.decorator';
 
 import { CreateCartItemDto } from '../dtos/carts/request/create-cart-item.dto';

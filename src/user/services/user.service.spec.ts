@@ -15,7 +15,6 @@ import { UserService } from './user.service';
 describe('UserService', () => {
   let userService: UserService;
   let authService: AuthService;
-  let sendgridService: SendgridService;
   let userFactory: UserFactory;
 
   beforeAll(async () => {
@@ -26,7 +25,6 @@ describe('UserService', () => {
 
     userService = app.get<UserService>(UserService);
     authService = app.get<AuthService>(AuthService);
-    sendgridService = app.get<SendgridService>(SendgridService);
     userFactory = new UserFactory(prisma);
   });
 

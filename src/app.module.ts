@@ -13,6 +13,7 @@ import { FunkoModule } from './funkos/funko.module';
 import { CartService } from './carts/services/cart.service';
 import { CartModule } from './carts/cart.module';
 import { ConfigModule } from '@nestjs/config';
+import { FilesService } from './services/file.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ConfigModule } from '@nestjs/config';
     SendgridService,
     RolesGuard,
     FunkoService,
+    FilesService,
   ],
 })
 export class AppModule {}

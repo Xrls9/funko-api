@@ -8,3 +8,14 @@ export enum UserRole {
   client = 'client',
   manager = 'manager',
 }
+
+export enum Reactions {
+  like = 'like',
+  none = 'none',
+}
+
+export const allowedValidMimeTypes = {
+  'image/png': 'png',
+  'image/jgp': 'jpg',
+  'image/jpeg': 'jpeg',
+};

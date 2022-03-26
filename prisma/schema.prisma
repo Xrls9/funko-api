@@ -64,15 +64,15 @@ model Funko {
 }
 
 model FunkoReaction {
-  id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default(uuid())
-  userId    String?  @map("user_id")
-  user      User?    @relation(fields: [userId], references: [uuid])
-  funkoId   String   @map("funko_id")
-  funko     Funko    @relation(fields: [funkoId], references: [uuid])
-  reaction  String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        Int       @id @default(autoincrement())
+  uuid      String    @unique @default(uuid())
+  userId    String?   @map("user_id")
+  user      User?     @relation(fields: [userId], references: [uuid])
+  funkoId   String    @map("funko_id")
+  funko     Funko     @relation(fields: [funkoId], references: [uuid])
+  reaction  Reactions
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("funko_reactions")
 }
@@ -142,4 +142,9 @@ model OrderItem {
 enum UserRole {
   client
   manager
+}
+
+enum Reactions {
+  like
+  none
 }

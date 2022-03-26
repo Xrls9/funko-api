@@ -5,12 +5,14 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
   ParseIntPipe,
   Patch,
   Post,
   Query,
-  Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { RolesGuard } from '../../guards/role.guard';
 import { Public } from '../../decorators/set-public.decorator';
@@ -29,7 +31,13 @@ import { User } from '@prisma/client';
 import { getUser } from '../../user/decorators/get-user.decorator';
 import { PaginationDto } from '../dtos/res/pagination.dto';
 import { Roles } from '../../decorators/role.decorator';
-import { UserRole } from '../../utils/enums';
+import { Reactions, UserRole } from '../../utils/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserDto } from '../../user/dtos/response/user.dto';
+import { CreateFunkoReactionDto } from '../dtos/req/create-funko-reaction.dto';
+import { plainToInstance } from 'class-transformer';
+import { FunkoReactionDto } from '../dtos/res/funko-reaction.dto';
+import { UpdateFunkoReactionDto } from '../dtos/req/update-funko-reaction.dto';
 
 @ApiTags('Funkos')
 @Controller('funkos')
@@ -115,5 +123,83 @@ export class FunkoController {
   })
   async showFunko(@Param('id') funkoUuid: string): Promise<FunkoDto> {
     return await this.funkoService.findOne(funkoUuid);
+  }
+
+  @Post(':id/upload-file')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.manager)
+  @ApiOperation({ summary: 'Generates url to file upload' })
+  @ApiResponse({ status: 200, description: 'Signed Url' })
+  @ApiResponse({
+    status: 404,
+    description: 'Funko not found',
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Param('id') funkoUuid: string,
+    @UploadedFile() file,
+  ): Promise<string> {
+    return await this.funkoService.uploadFile(funkoUuid, file.mimetype);
+  }
+
+  @Get(':id/file')
+  async getFile(@Param('id') funkoUuid: string): Promise<string> {
+    const funko = await this.funkoService.findOne(funkoUuid);
+    return await this.funkoService.getFile(funko.image);
+  }
+
+  @Post(':id/reaction-:reaction')
+  @ApiOperation({ summary: 'Sets a reaction to a funko made by an user' })
+  @ApiResponse({ status: 200, description: 'reaction created info' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict: Reaction has been setted up ',
+  })
+  async setReaction(
+    @Param('id') funkoUuid: string,
+    @Param('reaction', new ParseEnumPipe(Reactions)) reaction: Reactions,
+    @getUser() user: UserDto,
+  ): Promise<FunkoReactionDto> {
+    const reactionDto = plainToInstance(CreateFunkoReactionDto, {
+      userId: user.uuid,
+      funkoId: funkoUuid,
+      reaction: reaction,
+    });
+
+    return await this.funkoService.setReaction(reactionDto);
+  }
+
+  @Patch(':id/update-reaction-:reaction')
+  @ApiOperation({ summary: 'Updates a reaction to a funko made by an user' })
+  @ApiResponse({ status: 200, description: 'reaction updated info' })
+  @ApiResponse({
+    status: 404,
+    description: 'NotFound: No funko reaction found ',
+  })
+  async updateReaction(
+    @Param('id') funkoUuid: string,
+    @Param('reaction', new ParseEnumPipe(Reactions))
+    reaction: Reactions,
+    @getUser() user: UserDto,
+  ): Promise<FunkoReactionDto> {
+    const reactionDto = plainToInstance(UpdateFunkoReactionDto, {
+      userId: user.uuid,
+      reaction: reaction,
+    });
+    return await this.funkoService.updateReaction(funkoUuid, reactionDto);
+  }
+
+  @Get(':id/my-reaction')
+  @ApiOperation({ summary: 'Shows a reaction to a funko made by an user' })
+  @ApiResponse({ status: 200, description: 'reaction info' })
+  @ApiResponse({
+    status: 404,
+    description: 'NotFound: No funko reaction found ',
+  })
+  async showReaction(
+    @Param('id') funkoUuid: string,
+    @getUser() user: UserDto,
+  ): Promise<FunkoReactionDto> {
+    return await this.funkoService.showReaction(funkoUuid, user.uuid);
   }
 }

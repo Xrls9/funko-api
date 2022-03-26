@@ -6,6 +6,7 @@ import { JwtStrategy } from '../services/jwt.strategy';
 import { SendgridService } from '../services/sengrid.service';
 import { FunkoController } from './controllers/funko.controller';
 import { FunkoService } from './services/funko.service';
+import { FilesService } from '../services/file.service';
 
 @Module({
   imports: [AuthModule],
@@ -16,6 +17,7 @@ import { FunkoService } from './services/funko.service';
     SendgridService,
     FunkoService,
     RolesGuard,
+    FilesService,
   ],
   exports: [FunkoModule, FunkoService],
 })
