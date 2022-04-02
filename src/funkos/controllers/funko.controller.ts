@@ -142,6 +142,7 @@ export class FunkoController {
     status: 404,
     description: 'Funko not found',
   })
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @Param('id') funkoUuid: string,
@@ -164,6 +165,7 @@ export class FunkoController {
     status: 409,
     description: 'Conflict: Reaction has been setted up ',
   })
+  @ApiBearerAuth()
   async setReaction(
     @Param('id') funkoUuid: string,
     @Param('reaction', new ParseEnumPipe(Reactions)) reaction: Reactions,
@@ -186,6 +188,7 @@ export class FunkoController {
     status: 404,
     description: 'NotFound: No funko reaction found ',
   })
+  @ApiBearerAuth()
   async updateReaction(
     @Param('id') funkoUuid: string,
     @Param('reaction', new ParseEnumPipe(Reactions))
@@ -207,6 +210,7 @@ export class FunkoController {
     status: 404,
     description: 'NotFound: No funko reaction found ',
   })
+  @ApiBearerAuth()
   async showReaction(
     @Param('id') funkoUuid: string,
     @getUser() user: UserDto,
