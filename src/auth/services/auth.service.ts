@@ -47,9 +47,8 @@ export class AuthService {
       await prisma.token.delete({ where: { jti: sub as string } });
       return true;
     } catch (error) {
-      console.error(error);
+      throw new NotFound('Token not found');
     }
-    return false;
   }
 
   async createToken(id: string): Promise<Token> {

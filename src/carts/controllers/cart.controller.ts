@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -13,7 +14,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Roles } from '../../decorators/role.decorator';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { getUser } from '../../user/decorators/get-user.decorator';
+import { UserRole } from '../../utils/enums';
 
 import { CreateCartItemDto } from '../dtos/carts/request/create-cart-item.dto';
 
@@ -30,6 +34,7 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Creates a shopping cart for a user' })
   @ApiResponse({ status: 200, description: 'Funko updated Info' })
   @ApiResponse({
@@ -46,6 +51,7 @@ export class CartController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Updates an existing Cart' })
   @ApiResponse({ status: 200, description: 'Cart updated Info' })
   @ApiResponse({
@@ -65,6 +71,7 @@ export class CartController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Returns the info of an existing cart' })
   @ApiResponse({ status: 200, description: 'Cart Info' })
   @ApiResponse({
@@ -77,6 +84,7 @@ export class CartController {
   }
 
   @Get(':id/details')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Returns a list of CartItems' })
   @ApiResponse({ status: 200, description: 'CartItems Info' })
   @ApiResponse({
@@ -89,6 +97,7 @@ export class CartController {
   }
 
   @Post(':id/addFunko')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Add an item to the Shopping Cart' })
   @ApiResponse({ status: 200, description: 'CartItem Info' })
   @ApiResponse({
@@ -104,6 +113,7 @@ export class CartController {
   }
 
   @Patch(':id/updateItem')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Updates an existing item of the Shopping Cart' })
   @ApiResponse({ status: 200, description: 'CartItem Info' })
   @ApiResponse({
@@ -125,6 +135,7 @@ export class CartController {
   }
 
   @Post(':id/deleteItem')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Deletes an existing item of the Shopping Cart' })
   @ApiResponse({ status: 200, description: 'CartItem Info' })
   @ApiResponse({
@@ -139,6 +150,7 @@ export class CartController {
   }
 
   @Post(':id/clearCart')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Clear Cart' })
   @ApiResponse({ status: 200, description: 'OrderResponse' })
   @ApiResponse({
@@ -159,6 +171,7 @@ export class CartController {
   }
 
   @Post(':id/checkout')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Proceed to Checkout' })
   @ApiResponse({ status: 200, description: 'OrderResponse' })
   @ApiResponse({
@@ -181,6 +194,8 @@ export class CartController {
   }
 
   @Get('show-orders/:id')
+  @Roles(UserRole.manager)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'shows orders from a Client' })
   @ApiResponse({ status: 200, description: 'Orders' })
   @ApiResponse({

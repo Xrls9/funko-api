@@ -38,13 +38,15 @@ import { CreateFunkoReactionDto } from '../dtos/req/create-funko-reaction.dto';
 import { plainToInstance } from 'class-transformer';
 import { FunkoReactionDto } from '../dtos/res/funko-reaction.dto';
 import { UpdateFunkoReactionDto } from '../dtos/req/update-funko-reaction.dto';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { GetFunkosPaginatedDto } from '../dtos/req/get-funkos-paginated-dto';
 
 @ApiTags('Funkos')
+// @UseGuards(RolesGuard)
 @Controller('funkos')
 export class FunkoController {
   constructor(private readonly funkoService: FunkoService) {}
 
-  @Roles(UserRole.manager)
   @Post()
   @ApiOperation({ summary: 'Creates a new Funko' })
   @ApiResponse({ status: 200, description: 'Funko created Info' })
@@ -52,7 +54,8 @@ export class FunkoController {
     status: 401,
     description: 'Unauthorized, you must be a manager role User',
   })
-  @UseGuards(RolesGuard)
+  @Roles(UserRole.manager)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   async create(
     @getUser() user: User,
@@ -71,12 +74,17 @@ export class FunkoController {
     pageItems: number,
     @Query('category', new DefaultValuePipe('')) category: string,
   ): Promise<PaginationDto> {
-    return await this.funkoService.find(page, pageItems, category);
+    const getFunkosPaginatedDto = plainToInstance(GetFunkosPaginatedDto, {
+      page,
+      pageItems,
+      category,
+    });
+    return await this.funkoService.find(getFunkosPaginatedDto);
   }
 
   @Patch(':id')
-  @UseGuards(RolesGuard)
   @Roles(UserRole.manager)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Updates an existing Funko' })
   @ApiResponse({ status: 200, description: 'Funko updated Info' })
   @ApiResponse({
@@ -96,7 +104,7 @@ export class FunkoController {
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.manager)
   @ApiOperation({ summary: 'Deletes an existing Funko' })
   @ApiResponse({ status: 200, description: 'Funko deleted Info' })
@@ -126,7 +134,7 @@ export class FunkoController {
   }
 
   @Post(':id/upload-file')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.manager)
   @ApiOperation({ summary: 'Generates url to file upload' })
   @ApiResponse({ status: 200, description: 'Signed Url' })
@@ -149,6 +157,7 @@ export class FunkoController {
   }
 
   @Post(':id/reaction-:reaction')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Sets a reaction to a funko made by an user' })
   @ApiResponse({ status: 200, description: 'reaction created info' })
   @ApiResponse({
@@ -170,6 +179,7 @@ export class FunkoController {
   }
 
   @Patch(':id/update-reaction-:reaction')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Updates a reaction to a funko made by an user' })
   @ApiResponse({ status: 200, description: 'reaction updated info' })
   @ApiResponse({
@@ -190,6 +200,7 @@ export class FunkoController {
   }
 
   @Get(':id/my-reaction')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Shows a reaction to a funko made by an user' })
   @ApiResponse({ status: 200, description: 'reaction info' })
   @ApiResponse({

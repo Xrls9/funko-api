@@ -13,10 +13,14 @@ import { UpdateCartItemDto } from '../dtos/carts/request/update-cart-item.dto';
 import { Order } from '../dtos/orders/response/order.dto';
 import { OrderResponse } from '../dtos/orders/response/order-response.dto';
 import { OrderItem } from '../dtos/orders/response/order-item.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CartService {
-  constructor(private funkoService: FunkoService) {}
+  constructor(
+    private funkoService: FunkoService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async createCart(userUuid: string): Promise<CartDto> {
     const cart = await prisma.cart.create({
@@ -63,7 +67,6 @@ export class CartService {
           uuid: cartUuid,
         },
       });
-      console.log('cartfound:', cart);
 
       return plainToInstance(CartDto, cart);
     } catch (error) {
@@ -185,7 +188,6 @@ export class CartService {
         OrderItem,
         await this.getCartItems(cart.uuid),
       );
-      console.log(items);
 
       if (items.length === 0) throw new ConflictException('Cart is Empty');
 
@@ -207,27 +209,33 @@ export class CartService {
     orderUuid: string,
     items: OrderItem[],
   ): Promise<number> {
-    items.map(async (item) => {
+    for (const item of items) {
       //NOTE: checkStock
       await this.checkStock(item.funkoId, item.quantity);
 
       //NOTE: updateStock
-      await prisma.funko.update({
+      const funko = await prisma.funko.update({
         where: { uuid: item.funkoId },
         data: {
           stock: { decrement: item.quantity },
         },
       });
-      return { ...item, orderId: orderUuid };
-    });
 
-    const result = await prisma.orderItem.createMany({ data: items });
+      if (funko.stock <= 3 && funko.stock > 0) {
+        this.eventEmitter.emit('order.updated', funko);
+      }
+
+      item.orderId = orderUuid;
+    }
+
+    const orders = plainToInstance(OrderItem, items);
+
+    const result = await prisma.orderItem.createMany({ data: orders });
     return result.count;
   }
 
   async showUserOrders(userUuid: string): Promise<Order[]> {
     const orders = await prisma.order.findMany({ where: { userId: userUuid } });
-    console.log(orders);
     return plainToInstance(Order, orders);
   }
 }

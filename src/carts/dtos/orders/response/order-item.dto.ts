@@ -6,5 +6,5 @@ import { CartItemDto } from '../../carts/response/cart-item.dto';
 @Exclude()
 export class OrderItem extends OmitType(CartItemDto, ['cartId'] as const) {
   @Expose()
-  readonly orderId: string;
+  orderId: string;
 }

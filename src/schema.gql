@@ -1,0 +1,226 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CartItemModel {
+  cartId: String!
+  description: String!
+  funkoId: String!
+  quantity: Float!
+  totalPrice: Float!
+  unitPrice: Float!
+  uuid: String!
+}
+
+type CartModel {
+  createdAt: String!
+  totalPrice: Float!
+  uuid: String!
+}
+
+input CreateCartItemInput {
+  funkoId: String!
+  quantity: Float!
+}
+
+input CreateFunkoInput {
+  active: Boolean!
+  category: String
+  description: String
+  image: String
+  name: String!
+  price: Float!
+  stock: Int!
+}
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  role: String!
+  username: String!
+  verified: Boolean!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FunkoModel {
+  active: Boolean!
+  category: String!
+  image: String
+  name: String!
+  price: Float!
+  stock: Float!
+  uuid: String!
+}
+
+type FunkoReactionModel {
+  createdAt: DateTime!
+  funkoId: String!
+  reaction: String!
+  updatedAt: DateTime!
+  userId: String!
+  uuid: String!
+}
+
+input GetFunkosPaginatedInput {
+  category: String
+  page: Int = 1
+  pageItems: Int = 10
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  """Add an item to the Shopping Cart"""
+  addItemToCart(cartUuid: String!, input: CreateCartItemInput!): CartItemModel!
+
+  """Clear Cart"""
+  clearCart(cartUuid: String!): CartModel!
+
+  """Creates a shopping cart for a user"""
+  createCart: CartModel!
+
+  """Creates a new Funko"""
+  createFunko(input: CreateFunkoInput!): FunkoModel!
+
+  """Creates a new User"""
+  createUser(input: CreateUserInput!): UserModel!
+
+  """Deletes an existing item of the Shopping Cart"""
+  deleteCartItem(cartItemUuid: String!): CartItemModel!
+
+  """Deletes an existing Funko"""
+  deleteFunko(funkoUuid: String!): FunkoModel!
+  logIn(data: LoginInput!): TokenModel!
+
+  """Proceed to Checkout returns a response containing order data"""
+  proceedToCheckout(cartUuid: String!): OrderResponseModel!
+
+  """Sets a reaction to a funko made by an user"""
+  setReaction(funkoUuid: String!, reaction: String!): FunkoReactionModel!
+
+  """Updates an existing Cart"""
+  updateCart(cartUuid: String!, input: UpdateCartInput!): CartModel!
+
+  """Updates an existing item of the Shopping Cart"""
+  updateCartItem(cartItemUuid: String!, quantity: UpdateCartItemInput!): CartItemModel!
+
+  """Updates an existing Funko"""
+  updateFunko(funkoUuid: String!, input: UpdateFunkoInput!): FunkoModel!
+
+  """Updates a reaction to a funko made by an user"""
+  updateReaction(funkoUuid: String!, reaction: String!): FunkoReactionModel!
+
+  """Update user info"""
+  updateUser(input: UpdateUserInput!, userUuid: String!): UserModel!
+}
+
+type OrderItemModel {
+  description: String!
+  funkoId: String!
+  orderId: String!
+  quantity: Float!
+  totalPrice: Float!
+  unitPrice: Float!
+  uuid: String!
+}
+
+type OrderModel {
+  createdAt: String!
+  totalPrice: Float!
+  userId: String!
+  uuid: String!
+}
+
+type OrderResponseModel {
+  count: Float!
+  orderDetails: [OrderItemModel!]!
+  orderInfo: OrderModel!
+}
+
+type PaginationInfoModel {
+  skip: Float!
+  take: Float!
+}
+
+type PaginationModel {
+  paginationInfo: PaginationInfoModel!
+  results: [FunkoModel!]!
+}
+
+type Query {
+  """Returns the info of an existing cart"""
+  cartInfo(cartUuid: String!): CartModel!
+
+  """Gets user's profile"""
+  findUser(userUuid: String!): UserModel!
+  getFile(funkoUuid: String!): String!
+
+  """Gets a list of Funkos by category and paginated"""
+  getFunkos(input: GetFunkosPaginatedInput!): PaginationModel!
+
+  """Returns a list of Items that belong to a cart"""
+  showCartDetails(cartUuid: String!): [CartItemModel!]!
+
+  """Shows a funko information"""
+  showFunko(funkoUuid: String!): FunkoModel!
+
+  """Shows a reaction to a funko made by an user"""
+  showReaction(funkoUuid: String!): FunkoReactionModel!
+
+  """shows orders from a Client"""
+  showUserOrders(userUuid: String!): [OrderModel!]!
+}
+
+type TokenModel {
+  accessToken: String!
+  exp: Float!
+}
+
+input UpdateCartInput {
+  totalPrice: Float!
+}
+
+input UpdateCartItemInput {
+  quantity: Float!
+}
+
+input UpdateFunkoInput {
+  active: Boolean
+  category: String
+  description: String
+  image: String
+  name: String
+  price: Float
+  stock: Int
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  password: String
+  role: String
+  username: String
+  verified: Boolean
+}
+
+type UserModel {
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: String!
+  updatedAt: DateTime!
+  username: String!
+  uuid: String!
+  verified: Boolean!
+}

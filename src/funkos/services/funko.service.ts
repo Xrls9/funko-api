@@ -12,24 +12,22 @@ import { FilesService } from '../../services/file.service';
 import { CreateFunkoReactionDto } from '../dtos/req/create-funko-reaction.dto';
 import { FunkoReactionDto } from '../dtos/res/funko-reaction.dto';
 import { UpdateFunkoReactionDto } from '../dtos/req/update-funko-reaction.dto';
+import { PaginationInfoDto } from '../dtos/res/pagination-info.dto';
+import { GetFunkosPaginatedDto } from '../dtos/req/get-funkos-paginated-dto';
 
 @Injectable()
 export class FunkoService {
   constructor(private filesService: FilesService) {}
 
-  async find(
-    page: number,
-    pageItems: number,
-    category: string,
-  ): Promise<PaginationDto> {
-    const skip = (page - 1) * pageItems;
-    const take = pageItems;
+  async find({ ...input }: GetFunkosPaginatedDto): Promise<PaginationDto> {
+    const skip = (input.page - 1) * input.pageItems;
+    const take = input.pageItems;
     const funkos = await prisma.funko.findMany({
       skip,
       take,
       orderBy: { createdAt: 'desc' },
       where: {
-        category: { contains: category },
+        category: { contains: input.category },
         active: true,
       },
     });
@@ -41,10 +39,13 @@ export class FunkoService {
       }
     }
 
-    return {
+    return plainToInstance(PaginationDto, {
       results: plainToInstance(FunkoDto, funkos),
-      paginationInfo: { skip, take: funkos.length },
-    };
+      paginationInfo: plainToInstance(PaginationInfoDto, {
+        skip,
+        take: funkos.length,
+      }),
+    });
   }
 
   async create(uuid: string, { ...input }: CreateFunkoDto): Promise<FunkoDto> {
@@ -107,7 +108,7 @@ export class FunkoService {
 
     return plainToInstance(FunkoDto, {
       ...funko,
-      image: await this.getFile(funko.image),
+      image: funko.image ? await this.getFile(funko.image) : null,
     });
   }
 

@@ -7,6 +7,7 @@ import { SendgridService } from '../services/sengrid.service';
 import { FunkoController } from './controllers/funko.controller';
 import { FunkoService } from './services/funko.service';
 import { FilesService } from '../services/file.service';
+import { FunkoResolver } from './resolvers/funko.resolver';
 
 @Module({
   imports: [AuthModule],
@@ -18,6 +19,7 @@ import { FilesService } from '../services/file.service';
     FunkoService,
     RolesGuard,
     FilesService,
+    FunkoResolver,
   ],
   exports: [FunkoModule, FunkoService],
 })

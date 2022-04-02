@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { prisma } from '../../prisma';
 import { UnprocessableEntity } from 'http-errors';
 import { CreateUserDto } from '../dtos/request/create-user.dto';
@@ -11,6 +11,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaErrorEnum } from '../../utils/enums';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
 import { SendgridService } from '../../services/sengrid.service';
+import { PasswordRecoveryDto } from '../dtos/request/password-recovery.dto';
 
 @Injectable()
 export class UserService {
@@ -77,6 +78,36 @@ export class UserService {
             throw new NotFound('User not found');
           case PrismaErrorEnum.DUPLICATED:
             throw new UnprocessableEntity('email already taken');
+        }
+      }
+
+      throw new ConflictException(error);
+    }
+  }
+
+  async changePassword(
+    uuid: string,
+    { ...input }: PasswordRecoveryDto,
+  ): Promise<UserDto> {
+    try {
+      const user = await prisma.user.update({
+        data: {
+          password: hashSync(input.password, 10),
+        },
+        where: {
+          uuid,
+        },
+      });
+      this.sendgridService.sendEmail(
+        user.email,
+        `<h1> Your password has been changed succesfully <h1>`,
+        'Password Change',
+      );
+      return plainToInstance(UserDto, user);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === PrismaErrorEnum.NOT_FOUND) {
+          throw new NotFound('User not found');
         }
       }
 

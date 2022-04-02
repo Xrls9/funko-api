@@ -1,5 +1,4 @@
-import { Exclude, Expose, Transform } from 'class-transformer';
-import { IsOptional } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
 
 // get users response
 @Exclude()
@@ -12,4 +11,7 @@ export class CartDto {
 
   @Expose()
   readonly createdAt: string;
+
+  @Expose()
+  readonly userId: string;
 }
