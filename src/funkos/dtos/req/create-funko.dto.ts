@@ -17,7 +17,7 @@ export class CreateFunkoDto extends BaseDto {
   @Expose()
   @IsOptional()
   @IsString()
-  readonly image: string;
+  readonly image?: string;
 
   @Expose()
   @IsOptional()
