@@ -1,4 +1,4 @@
-import { Cart, CartItem, Funko, User } from '@prisma/client';
+import { Funko, User } from '@prisma/client';
 import { clearDatabase, prisma } from '../../prisma';
 import { FunkoFactory } from '../../funkos/factories/funko.factory';
 import { UserFactory } from '../../user/factories/user.factory';
@@ -11,20 +11,19 @@ import { UpdateCartDto } from '../dtos/carts/request/update-cart.dto';
 import { CartDto } from '../dtos/carts/response/cart.dto';
 import { plainToInstance } from 'class-transformer';
 import { NotFound } from 'http-errors';
-import { CartFactory } from '../factories/cart.factory';
 import { CreateCartItemDto } from '../dtos/carts/request/create-cart-item.dto';
-import { CartItemFactory } from '../factories/cart-item.factory';
 import { FunkoService } from '../../funkos/services/funko.service';
 import { CartItemDto } from '../dtos/carts/response/cart-item.dto';
-import { rejects } from 'assert';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FilesService } from '../../services/file.service';
+import { ConflictException } from '@nestjs/common';
+import { OrderItem } from '../dtos/orders/response/order-item.dto';
 
 describe('CartService', () => {
   let cartService: CartService;
-  let funkoService: FunkoService;
   let userFactory: UserFactory;
   let funkoFactory: FunkoFactory;
-  let cartFactory: CartFactory;
-  let cartItemFactory: CartItemFactory;
   let testCart: CartDto;
   let cartItemDto: CartItemDto;
 
@@ -40,15 +39,18 @@ describe('CartService', () => {
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [CartController],
-      providers: [CartService, FunkoService],
+      providers: [
+        CartService,
+        FunkoService,
+        EventEmitter2,
+        ConfigService,
+        FilesService,
+      ],
     }).compile();
 
     cartService = app.get<CartService>(CartService);
-    funkoService = app.get<FunkoService>(FunkoService);
     userFactory = new UserFactory(prisma);
     funkoFactory = new FunkoFactory(prisma);
-    cartFactory = new CartFactory(prisma);
-    cartItemFactory = new CartItemFactory(prisma);
 
     updateCartDto = plainToInstance(UpdateCartDto, {
       totalPrice: 30.0,
@@ -78,7 +80,7 @@ describe('CartService', () => {
   });
 
   afterAll(async () => {
-    // await clearDatabase();
+    await clearDatabase();
     await prisma.$disconnect();
   });
 
@@ -138,9 +140,7 @@ describe('CartService', () => {
         cartService.updateCartItem(cartItemDto.uuid, {
           quantity: 100,
         }),
-      ).rejects.toThrowError(
-        new Error('This product does not have enough stock'),
-      );
+      ).rejects.toThrowError(new Error('The funko Iron Man is not available'));
     });
     it('should update the cart-item values', async () => {
       const result = await cartService.updateCartItem(cartItemDto.uuid, {
@@ -160,6 +160,56 @@ describe('CartService', () => {
     it('should delete the cart-item', async () => {
       const result = await cartService.deleteCartItem(cartItemDto.uuid);
       expect(result).toHaveProperty('quantity');
+    });
+  });
+
+  describe('checkout', () => {
+    it('should throw an error if cart is empty', async () => {
+      await expect(cartService.checkout(testCart.uuid)).rejects.toThrowError(
+        new ConflictException('Cart is Empty'),
+      );
+    });
+
+    it('should return an order response, containing info', async () => {
+      await cartService.addItemToCart(testCart.uuid, createCartItemDto);
+      const result = await cartService.checkout(testCart.uuid);
+      expect(result).toHaveProperty('orderInfo');
+      expect(result).toHaveProperty('orderDetails');
+      expect(result).toHaveProperty('count');
+      expect(result.orderInfo.totalPrice).toBe(50);
+    });
+  });
+
+  describe('clearCart', () => {
+    it('should throw an error if the cart does not exist', async () => {
+      await expect(cartService.clearCart(datatype.uuid())).rejects.toThrowError(
+        new NotFound('Cart not found'),
+      );
+    });
+
+    it('should clear cart', async () => {
+      const result = await cartService.clearCart(testCart.uuid);
+      expect(result).toHaveProperty('totalPrice', 0);
+    });
+  });
+
+  describe('addItemsToOrder', () => {
+    it('should return the number of cart items registered to the order', async () => {
+      await cartService.addItemToCart(testCart.uuid, createCartItemDto);
+      const newOrder = await prisma.order.create({
+        data: {
+          userId: testCart.userId,
+          totalPrice: testCart.totalPrice,
+        },
+      });
+      const result = await cartService.addItemsToOrder(
+        newOrder.uuid,
+        plainToInstance(
+          OrderItem,
+          await prisma.cartItem.findMany({ where: { cartId: testCart.uuid } }),
+        ),
+      );
+      expect(result).toBe(1);
     });
   });
 });

@@ -1,30 +1,38 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { internet, datatype, commerce } from 'faker';
 import { NotFound } from 'http-errors';
 import { clearDatabase, prisma } from '../../prisma';
+import { FilesService } from '../../services/file.service';
 import { UserFactory } from '../../user/factories/user.factory';
+import { Reactions } from '../../utils/enums';
 import { FunkoController } from '../controllers/funko.controller';
+import { CreateFunkoReactionDto } from '../dtos/req/create-funko-reaction.dto';
 import { CreateFunkoDto } from '../dtos/req/create-funko.dto';
+import { GetFunkosPaginatedDto } from '../dtos/req/get-funkos-paginated-dto';
+import { UpdateFunkoReactionDto } from '../dtos/req/update-funko-reaction.dto';
 import { UpdateFunkoDto } from '../dtos/req/update-funko.dto';
+import { FunkoReactionDto } from '../dtos/res/funko-reaction.dto';
 import { FunkoDto } from '../dtos/res/funko.dto';
 import { FunkoFactory } from '../factories/funko.factory';
 import { FunkoService } from './funko.service';
 
 describe('FunkoService', () => {
   //TODO remove imports and unused vars with eslint
-  let randomvar: FunkoService;
+
   let funkoService: FunkoService;
   let userFactory: UserFactory;
   let funkoFactory: FunkoFactory;
   let newUser: User;
   let dto: CreateFunkoDto;
+  let newFunko: FunkoDto;
 
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [FunkoController],
-      providers: [FunkoService],
+      providers: [FunkoService, FilesService, ConfigService],
     }).compile();
 
     funkoService = app.get<FunkoService>(FunkoService);
@@ -55,8 +63,8 @@ describe('FunkoService', () => {
 
   describe('create', () => {
     it('should create a new funko', async () => {
-      const result = await funkoService.create(newUser.uuid, dto);
-      expect(result).toHaveProperty('active', true);
+      newFunko = await funkoService.create(newUser.uuid, dto);
+      expect(newFunko).toHaveProperty('active', true);
     });
   });
 
@@ -111,9 +119,14 @@ describe('FunkoService', () => {
         user: { connect: { uuid: (await userFactory.make()).uuid } },
       });
 
-      const result = await funkoService.find(0, funkos.length, 'default');
+      const result = await funkoService.find(
+        plainToInstance(GetFunkosPaginatedDto, {
+          page: 1,
+          pageItems: funkos.length,
+        }),
+      );
 
-      expect(result.length).toBe(funkos.length);
+      expect(result.results.length).toBe(funkos.length);
     });
   });
 
@@ -137,77 +150,49 @@ describe('FunkoService', () => {
     });
   });
 
-  // describe('Reactions: ', () => {
-  //   beforeAll(async () => {
-  //     post = await prisma.post.create({
-  //       data: {
-  //         ...dto,
-  //         userId: newUser.uuid,
-  //       },
-  //     });
+  describe('Reactions: ', () => {
+    let reactionDto: CreateFunkoReactionDto;
+    let newReaction: FunkoReactionDto;
+    beforeAll(async () => {
+      reactionDto = plainToInstance(CreateFunkoReactionDto, {
+        userId: newUser.uuid,
+        funkoId: newFunko.uuid,
+        reaction: Reactions.like,
+      });
+    });
 
-  //     reaction = plainToInstance(CreatePostReactionDto, {
-  //       postId: post.uuid,
-  //       status: 'L',
-  //     });
-  //   });
+    describe('createReaction', () => {
+      it('should create a reaction for the post', async () => {
+        newReaction = await funkoService.setReaction(reactionDto);
+        expect(newReaction).toHaveProperty('reaction', 'like');
+      });
+    });
 
-  //   describe('createReaction', () => {
-  //     it('should create a reaction for the post', async () => {
-  //       const result = await PostsService.createReaction(
-  //         newUser.uuid,
-  //         reaction,
-  //       );
-  //       expect(result).toHaveProperty('status', 'L');
-  //     });
-  //   });
+    describe('updateReaction', () => {
+      it('should update the reaction for the post', async () => {
+        const updateReactionDto = plainToInstance(UpdateFunkoReactionDto, {
+          reaction: Reactions.none,
+          userId: newUser.uuid,
+        });
+        const result = await funkoService.updateReaction(
+          newFunko.uuid,
+          updateReactionDto,
+        );
 
-  //   describe('updateReaction', () => {
-  //     it('should update the reaction for the post', async () => {
-  //       const newReaction = await PostsService.createReaction(
-  //         newUser.uuid,
-  //         reaction,
-  //       );
+        expect(result).toHaveProperty('reaction', 'none');
+      });
+    });
 
-  //       const result = await PostsService.updateReaction(newReaction.uuid, 'D');
+    describe('findPostReaction', () => {
+      it('should return the reaction to a post', async () => {
+        const result = await funkoService.showReaction(
+          newFunko.uuid,
+          newUser.uuid,
+        );
 
-  //       expect(result).toHaveProperty('status', 'D');
-  //     });
-
-  //     it('should throw an error if the post does not exist', async () => {
-  //       expect(async () => {
-  //         const result = await PostsService.updateReaction(
-  //           datatype.uuid(),
-  //           'D',
-  //         );
-  //       }).rejects.toThrowError(new NotFound('Post Reaction not found'));
-  //     });
-  //   });
-
-  //   describe('findPostReaction', () => {
-  //     it('should return the reaction to a post', async () => {
-  //       const newReaction = await PostsService.createReaction(
-  //         newUser.uuid,
-  //         reaction,
-  //       );
-
-  //       const result = await PostsService.findPostReaction(
-  //         newReaction.postId,
-  //         newUser.uuid,
-  //       );
-
-  //       expect(result[0]).toHaveProperty('status', 'L');
-  //       expect(result[0]).toHaveProperty('userId', newReaction.userId);
-  //     });
-
-  //     it('should return an empty array if there is no reaction to the post', async () => {
-  //       const result = await PostsService.findPostReaction(
-  //         datatype.uuid(),
-  //         newUser.uuid,
-  //       );
-
-  //       expect(result).toBeEmpty();
-  //     });
-  //   });
-  // });
+        expect(result).toHaveProperty('reaction', 'none');
+        expect(result).toHaveProperty('userId', newUser.uuid);
+      });
+    });
+  });
 });

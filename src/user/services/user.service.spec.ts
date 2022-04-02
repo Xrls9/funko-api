@@ -1,6 +1,9 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/client';
-import { plainToClass } from 'class-transformer';
+import { hashSync } from 'bcrypt';
+import { plainToInstance } from 'class-transformer';
+
 import { internet, name, datatype } from 'faker';
 import { NotFound, UnprocessableEntity } from 'http-errors';
 import { AuthService } from '../../auth/services/auth.service';
@@ -8,6 +11,7 @@ import { clearDatabase, prisma } from '../../prisma';
 import { SendgridService } from '../../services/sengrid.service';
 import { UserController } from '../controllers/user.controller';
 import { CreateUserDto } from '../dtos/request/create-user.dto';
+import { PasswordRecoveryDto } from '../dtos/request/password-recovery.dto';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
 import { UserFactory } from '../factories/user.factory';
 import { UserService } from './user.service';
@@ -20,7 +24,7 @@ describe('UserService', () => {
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [UserService, AuthService, SendgridService],
+      providers: [UserService, AuthService, SendgridService, ConfigService],
     }).compile();
 
     userService = app.get<UserService>(UserService);
@@ -41,7 +45,7 @@ describe('UserService', () => {
     it('should throw an error if the user already exists', async () => {
       const email = internet.email();
       await userFactory.make({ email });
-      const data = plainToClass(CreateUserDto, {
+      const data = plainToInstance(CreateUserDto, {
         firstName: name.firstName(),
         lastName: name.lastName(),
         email,
@@ -60,7 +64,7 @@ describe('UserService', () => {
         authService,
         'generateAccessToken',
       );
-      const data = plainToClass(CreateUserDto, {
+      const data = plainToInstance(CreateUserDto, {
         firstName: name.firstName(),
         lastName: name.lastName(),
         email: internet.email(),
@@ -117,7 +121,7 @@ describe('UserService', () => {
     });
 
     it('should throw an error if the user does not exist', async () => {
-      const data = plainToClass(UpdateUserDto, {});
+      const data = plainToInstance(UpdateUserDto, {});
 
       await expect(
         userService.update(datatype.uuid(), data),
@@ -131,7 +135,7 @@ describe('UserService', () => {
         userFactory.make({ email: existingEmail }),
       ]);
 
-      const data = plainToClass(UpdateUserDto, { email: existingEmail });
+      const data = plainToInstance(UpdateUserDto, { email: existingEmail });
 
       await expect(userService.update(user.uuid, data)).rejects.toThrowError(
         new UnprocessableEntity('email already taken'),
@@ -141,11 +145,34 @@ describe('UserService', () => {
     it('should update the user', async () => {
       const user = await userFactory.make();
       const newEmail = internet.email();
-      const dto = plainToClass(UpdateUserDto, { email: newEmail });
+      const dto = plainToInstance(UpdateUserDto, { email: newEmail });
 
       const result = await userService.update(user.uuid, dto);
 
       expect(result).toHaveProperty('email', newEmail);
+    });
+  });
+
+  describe('changePassword', () => {
+    beforeAll(() => {
+      jest.mock('jsonwebtoken', () => ({
+        sign: jest.fn().mockImplementation(() => 'my.jwt.token'),
+      }));
+    });
+
+    it('should update the password', async () => {
+      const user = await userFactory.make();
+      const newPassword = hashSync('randompassword', 10);
+      const dto = plainToInstance(PasswordRecoveryDto, {
+        password: newPassword,
+      });
+
+      const result = await userService.update(user.uuid, dto);
+      const userFromDatabase = await prisma.user.findUnique({
+        where: { uuid: result.uuid },
+      });
+
+      expect(newPassword).toBe(userFromDatabase.password);
     });
   });
 });

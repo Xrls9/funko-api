@@ -9,6 +9,7 @@ import { Unauthorized, NotFound } from 'http-errors';
 import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../controllers/auth.controller';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -18,7 +19,7 @@ describe('AuthService', () => {
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService],
+      providers: [AuthService, ConfigService],
     }).compile();
     authService = app.get<AuthService>(AuthService);
     userFactory = new UserFactory(prisma);
